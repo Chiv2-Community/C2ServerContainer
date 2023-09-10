@@ -1,21 +1,28 @@
 #!/bin/bash
 
-USERNAME="$1"
+# Exit on error
+# set -e
 
-INSTALL_DIR='/opt'
-CHIVALRY2_DIR="$INSTALL_DIR/steamapps/common/Chivalry 2"
+USERNAME="$1"
+CMD_STRING="$2"
+
+CHIVALRY2_DIR='/opt/Chivalry2'
 
 # Install Chivalry 2 if not installed
-if [ ! -d '/opt/Chivalry 2' ]; then
+if [ ! -d $CHIVALRY2_DIR ]; then
+  echo "Installing Proton 8.x"
+  steamcmd \
+    +force_install_dir $CHIVALRY2_DIR \
+    +login "$USERNAME" \
+    +app_update 2348590 \
+    +quit
+
   echo "Installing Chivalry 2 to '/opt/Chivalry 2'..."
-
-
-  mkdir '/opt/Chivalry 2'
   steamcmd \
     +@sSteamCmdForcePlatformType windows \
-    +force_install_dir $INSTALL_DIR \
+    +force_install_dir $CHIVALRY2_DIR \
     +login "$USERNAME" \
-    +app_update 1824220 validate \
+    +app_update 1824220 \
     +quit
 
   echo "Installing C2UMP Launcher"
@@ -34,8 +41,17 @@ if [ ! -d '/opt/Chivalry 2' ]; then
 fi
 
 echo "Found $(ls -1 '/mods' | wc -l) mods in /mods"
-echo $(ls -1 '/mods')
+echo $(tree '/mods')
 echo ""
 echo "Copying mods from /mods to $CHIVALRY2_DIR/TBL/Content/Paks"
-cp -r '/mods' "$CHIVALRY2_DIR/TBL/Content/Paks"
+rsync -r '/mods' "$CHIVALRY2_DIR/TBL/Content/Paks"
 
+echo ""
+echo "Copying config from /config to $CHIVALRY2_DIR"
+echo $(tree '/config')
+
+rsync -r '/config' "$CHIVALRY2_DIR"
+
+$CHIVALRY2_DIR/proton $CHIVALRY2_DIR/Chivalry2Launcher.exe "$CMD_STRING" -nullrhi -rcon
+
+sleep 10000
