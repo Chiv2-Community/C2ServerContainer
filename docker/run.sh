@@ -6,10 +6,15 @@
 USERNAME="$1"
 CMD_STRING="$2"
 
+PROTON_8_X_APP_ID=2348590 
+CHIVALRY2_APP_ID=1824220
+
 STEAM_DIR="$HOME/Steam"
 STEAM_APPS_DIR="$STEAM_DIR/steamapps"
+
 CHIVALRY2_DIR="$STEAM_APPS_DIR/common/Chivalry 2"
 PROTON_DIR="$STEAM_APPS_DIR/common/Proton 8.0"
+CONFIG_DIR="$STEAM_APPS_DIR/compatdata/${CHIVALRY2_APP_ID}/pfx/drive_c/users/steamuser/AppData/Local/Chivalry 2/Saved/Config"
 
 export STEAM_COMPAT_DATA_PATH=~/.local/share/Steam/steamapps/compatdata
 export STEAM_COMPAT_CLIENT_INSTALL_PATH=~/.local/share/Steam/
@@ -19,14 +24,14 @@ if [ ! -d "$CHIVALRY2_DIR" ]; then
   echo "Installing Proton 8.x to '$PROTON_DIR'"
   steamcmd \
     +login "$USERNAME" \
-    +app_update 2348590 \
+    +app_update $PROTON_8_X_APP_ID \
     +quit
 
   echo "Installing Chivalry 2 to '$CHIVALRY2_DIR'..."
   steamcmd \
     +@sSteamCmdForcePlatformType windows \
     +login "$USERNAME" \
-    +app_update 1824220 \
+    +app_update $CHIVALRY2_APP_ID \
     +quit
 
   echo "Installing C2UMP Launcher"
@@ -43,7 +48,6 @@ if [ ! -d "$CHIVALRY2_DIR" ]; then
   mkdir "$CHIVALRY2_DIR/Plugins"
   cp "$CHIVALRY2_DIR/TBL/Binaries/Win64/Plugins/UnchainedPlugin.dll" "$CHIVALRY2_DIR/Plugins/UnchainedPlugin.dll"
 
-
   echo "Installed files"
   tree "$STEAM_APPS_DIR"
 fi
@@ -58,7 +62,7 @@ echo ""
 echo "Copying config from /config to $CHIVALRY2_DIR"
 tree '/config'
 
-rsync -r '/config' "$CHIVALRY2_DIR"
+rsync -r '/config/*.ini' "$CONFIG_DIR/"
 
 "$PROTON_DIR/proton" "$CHIVALRY2_DIR/Chivalry2Launcher.exe" "$CMD_STRING" -nullrhi -rcon
 
